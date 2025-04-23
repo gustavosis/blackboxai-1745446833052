@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Video Recording - Service Directory App</title>
+  <link href="https://cdn.tailwindcss.com" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+  />
+  <link rel="stylesheet" href="css/videoRecording.css" />
+</head>
+<body class="bg-gray-50 font-roboto min-h-screen flex flex-col">
+  <header
+    class="relative bg-cover bg-center h-48 flex items-center justify-center text-white"
+    style="background-image: url('https://images.pexels.com/photos/271557/pexels-photo-271557.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260');"
+  >
+    <h1 class="text-3xl font-bold bg-black bg-opacity-50 px-4 py-2 rounded">
+      Record Your Video Demo
+    </h1>
+  </header>
+  <main class="flex flex-1 p-6 gap-6 max-w-7xl mx-auto w-full">
+    <section class="flex-1 flex flex-col items-center space-y-4">
+      <video
+        id="videoPreview"
+        class="w-full max-w-xl rounded shadow-lg bg-black"
+        autoplay
+        muted
+        playsinline
+      ></video>
+      <div class="flex space-x-4">
+        <button
+          id="btnRecord"
+          class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded flex items-center space-x-2"
+          title="Start Recording"
+        >
+          <i class="fas fa-circle"></i><span>Record</span>
+        </button>
+        <button
+          id="btnPause"
+          class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded flex items-center space-x-2 disabled:opacity-50"
+          title="Pause/Resume Recording"
+          disabled
+        >
+          <i class="fas fa-pause"></i><span>Pause</span>
+        </button>
+        <button
+          id="btnStop"
+          class="bg-gray-700 hover:bg-gray-800 text-white font-semibold py-2 px-4 rounded flex items-center space-x-2 disabled:opacity-50"
+          title="Stop Recording"
+          disabled
+        >
+          <i class="fas fa-stop"></i><span>Stop</span>
+        </button>
+        <button
+          id="btnPlay"
+          class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded flex items-center space-x-2 disabled:opacity-50"
+          title="Play Recorded Video"
+          disabled
+        >
+          <i class="fas fa-play"></i><span>Play</span>
+        </button>
+        <button
+          id="btnDownload"
+          class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded flex items-center space-x-2 disabled:opacity-50"
+          title="Download Recorded Video"
+          disabled
+        >
+          <i class="fas fa-download"></i><span>Download</span>
+        </button>
+      </div>
+    </section>
+    <aside class="w-64 bg-white rounded shadow p-4 overflow-y-auto max-h-[480px]">
+      <h2 class="text-xl font-semibold mb-4">Recording History</h2>
+      <ul id="recordingHistory" class="space-y-2 text-gray-700"></ul>
+    </aside>
+  </main>
+  <script src="js/videoRecording.js"></script>
+</body>
+</html>

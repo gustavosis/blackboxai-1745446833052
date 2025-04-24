@@ -6,24 +6,86 @@ const db = require('../db');
 
 // User registration
 router.post('/register', async (req, res) => {
-  const { username, password, email, role } = req.body;
-  if (!username || !password) {
-    return res.status(400).json({ error: 'Username and password are required.' });
+  const { name, lastname, email, password, role } = req.body;
+  
+  // Validación de campos requeridos
+  if (!name || !lastname || !email || !password) {
+    return res.status(400).json({ 
+      error: 'Todos los campos son requeridos.',
+      fields: {
+        name: !name ? 'Nombre es requerido' : null,
+        lastname: !lastname ? 'Apellido es requerido' : null,
+        email: !email ? 'Email es requerido' : null,
+        password: !password ? 'Contraseña es requerida' : null
+      }
+    });
   }
+
+  // Validación de formato de email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ error: 'Formato de email inválido' });
+  }
+
   try {
+    // Verificar si el email ya existe
+    const existingUser = await db.get('SELECT email FROM users WHERE email = ?', [email]);
+    if (existingUser) {
+      return res.status(400).json({ error: 'El email ya está registrado' });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
-    const sql = "INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, ?)";
-    const params = [username, hashedPassword, email || '', role || 'user'];
+    const username = `${name.toLowerCase()}.${lastname.toLowerCase()}`;
+    
+    const sql = `INSERT INTO users (
+      username, password, email, role, name, lastname
+    ) VALUES (?, ?, ?, ?, ?, ?)`;
+    
+    const params = [
+      username,
+      hashedPassword,
+      email,
+      role || 'user',
+      name,
+      lastname
+    ];
+
     db.run(sql, params, function(err) {
       if (err) {
-        console.error(err.message);
-        return res.status(500).json({ error: 'Failed to register user' });
+        console.error('Error en registro:', err.message);
+        return res.status(500).json({ error: 'Error al registrar usuario' });
       }
-      res.status(201).json({ id: this.lastID, username, email, role: role || 'user' });
+
+      // Login automático después del registro
+      req.login({
+        id: this.lastID,
+        username,
+        email,
+        role: role || 'user',
+        name,
+        lastname
+      }, (err) => {
+        if (err) {
+          console.error('Error en login automático:', err);
+          return res.status(500).json({ error: 'Error en autenticación' });
+        }
+        
+        res.status(201).json({ 
+          message: 'Registro exitoso',
+          user: {
+            id: this.lastID,
+            username,
+            email,
+            role: role || 'user',
+            name,
+            lastname
+          }
+        });
+      });
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error hashing password' });
+    console.error('Error en registro:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
 

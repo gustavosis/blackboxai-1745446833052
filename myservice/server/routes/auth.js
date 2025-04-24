@@ -1,4 +1,3 @@
-
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
@@ -35,33 +34,59 @@ router.post('/login', (req, res, next) => {
     if (!user) { return res.status(401).json({ error: 'Invalid credentials' }); }
     req.logIn(user, (err) => {
       if (err) { return next(err); }
-      return res.json({ message: 'Login successful', user: { id: user.id, username: user.username, email: user.email, role: user.role } });
+      return res.json({ 
+        message: 'Login successful', 
+        user: { 
+          id: user.id, 
+          username: user.username, 
+          email: user.email, 
+          role: user.role 
+        } 
+      });
     });
   })(req, res, next);
 });
 
 // Google OAuth login
-router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get('/google', passport.authenticate('google', { 
+  scope: ['profile', 'email'],
+  prompt: 'select_account' // Permite seleccionar cuenta cada vez
+}));
 
 // Google OAuth callback
 router.get('/google/callback', 
-  passport.authenticate('google', { failureRedirect: '/' }),
+  passport.authenticate('google', { 
+    failureRedirect: '/login?error=auth_failed',
+    failureFlash: true
+  }),
   (req, res) => {
-    // Successful authentication, redirect home or to dashboard
-    res.redirect('/');
+    const role = req.user.role || 'user';
+    res.redirect(`/${role}/dashboard`);
   }
 );
 
 // Facebook OAuth login
-router.get('/facebook', passport.authenticate('facebook', { scope: ['email'] }));
+router.get('/facebook', passport.authenticate('facebook', { 
+  scope: ['email'],
+  authType: 'rerequest' // Solicita permisos nuevamente si fueron denegados
+}));
 
 // Facebook OAuth callback
 router.get('/facebook/callback',
-  passport.authenticate('facebook', { failureRedirect: '/' }),
+  passport.authenticate('facebook', { 
+    failureRedirect: '/login?error=auth_failed',
+    failureFlash: true
+  }),
   (req, res) => {
-    // Successful authentication, redirect home or to dashboard
-    res.redirect('/');
+    const role = req.user.role || 'user';
+    res.redirect(`/${role}/dashboard`);
   }
 );
+
+// Logout route
+router.get('/logout', (req, res) => {
+  req.logout();
+  res.redirect('/login?message=logged_out');
+});
 
 module.exports = router;
